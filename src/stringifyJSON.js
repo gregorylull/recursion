@@ -56,11 +56,18 @@ var stringifyJSON = function (obj, previousString) {
   }
 
   if (typeof obj === 'number') {
-      return obj;
+      return String(obj);
+  }
+
+  if (typeof obj === 'boolean') {
+      return String(obj);
+  }
+
+  if (obj === null) {
+      return String(null);
   }
 
   // recursive cases
-
   // if obj ===  array, iterate through array and call stringify on each ele
   if (Array.isArray(obj)) {
       previousString += "[";
@@ -69,7 +76,7 @@ var stringifyJSON = function (obj, previousString) {
 
       for (var i = 0, length = obj.length; i < length; i++) {
 	  if (i > 0) {
-	      previousString += ', ';
+	      previousString += ',';
 	  }
 	  previousString += stringifyJSON(obj[i]);
           console.log('end loop :', previousString);	  
