@@ -91,10 +91,12 @@ var stringifyJSON = function (obj, previousString) {
       console.log("ent for in:", previousString);
 
       for (var propName in obj) {
-          previousString += (count > 0 ? ',' : '') + '\"' + propName + '\"'+ ":";
-          previousString += stringifyJSON(obj[propName]);
-	  console.log("end each for:", previousString);
-	  count++;
+          if (typeof obj[propName] !== 'function' && obj[propName] !== undefined) {
+              previousString += (count > 0 ? ',' : '') + '\"' + propName + '\"'+ ":";
+              previousString += stringifyJSON(obj[propName]);
+	      console.log("end each for:", previousString);
+	      count++;
+  	  }
       }
       previousString += "}";
       console.log("exit forIn :", previousString);
