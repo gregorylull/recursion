@@ -46,18 +46,78 @@ function stringify (arrPrimObj) {
 *******************************************************************************/
 
 // but you don't so you're going to have to write it from scratch:
-var stringifyJSON = function (obj) {
-  // starting
-  
+var stringifyJSON = function (obj, previousString) {
+  previousString = previousString || '';  
+  console.log('begin    :', previousString);
+    
+  // base cases
+  if (typeof obj === 'string') {
+     return '\"' + obj + '\"';
+  }
+
+  if (typeof obj === 'number') {
+      return obj;
+  }
+
+  // recursive cases
+
+  // if obj ===  array, iterate through array and call stringify on each ele
+  if (Array.isArray(obj)) {
+      previousString += "[";
+
+      console.log('enter if :', previousString);
+
+      for (var i = 0, length = obj.length; i < length; i++) {
+	  if (i > 0) {
+	      previousString += ', ';
+	  }
+	  previousString += stringifyJSON(obj[i]);
+          console.log('end loop :', previousString);	  
+      }
+
+      console.log('exit for :', previousString);
+
+      previousString += "]";
+  } else {
+      var count = 0;
+      previousString += "{";
+      console.log("ent for in:", previousString);
+
+      for (var propName in obj) {
+          previousString += (count > 0 ? ',' : '') + '\"' + propName + '\"'+ ":";
+          previousString += stringifyJSON(obj[propName]);
+	  console.log("end each for:", previousString);
+	  count++;
+      }
+      previousString += "}";
+      console.log("exit forIn :", previousString);
+  }
+
+  console.log('final ret:', previousString);
+  return previousString;
 };
 
+// primitive values and corner cases
+var test00 = [];         // empty array
+var test01 = {};         // empty literal obj
+var test02 = 0;          // number zero
+var test03 = 3;          // positive num
+var test04 = -4;         // neg number
+var test05 = '0';        // string char '0'
+var test06 = '3';        // string of pos number
+var test07 = 'a';        // char
+var test08 = '';         // empty string
+var test09 = 'word';     // string word
 
-// my own test cases
 var test0 = ['a'];
 var test1 = ['a', 'b', 'c'];
 var test2 = ['a', 'b', 2, 'c'];
 var test3 = ['a', 'b', ['c']];
 var test4 = ['a', 'b', [2, 'c']];
-var test5 = ['a', 'b', [[2], 'c']];
+var test5 = ['a', 'b', [[2], 'c'], 'd', [[[ 'e', '5' ], 'g', ], 10] ];
 var test6 = ['a', {no: 'yes'}, 'b'];
 var test7 = ['a', {no: 'yes'}, 'b', ['c', {d: ['three', 3, '3']}]];
+var test8 = {no: 'yes'};
+var test9 = {no: 'yes', five: 5};
+
+console.log(stringifyJSON(test7));
