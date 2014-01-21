@@ -1,33 +1,24 @@
-// this is what you would do if you liked things to be easy:
-// var stringifyJSON = JSON.stringify;
+/*
+  Author: Gregory Lull
+  Sate: January 2014
 
-// planning
+  Subject: implementing JSON.Stringify() using recursion
+
+*/
 
 /*******************************************************************************
 
-  // termination cases
-
-  // base cases
-
-  // recursion cases
-
-  1. call function on every element in an array to determine if: prim, obj, or arr
-  2. when calling function on an array, add brackets '[' + func(primObjArr) + ']';
-
-
-if (objArrPrim === 'array') {
-  for (var i = 0; i < length; i++) {
-    
-  }  
-}
+planning / thoughts:
 
 -----
 
 for a simple array ['a', 'b']
 
-can create an empty parent array that holds values [index0, index1]
+can create an empty parent array that holds values [index0, index1]  
 
 index0 = stringified 'a', index1 = stringified 'b'
+
+  // why not just bypass array creation? add to a string instead
 
 base cases: 
   if string -> add string to result string  // result + ', ' + string;
@@ -37,96 +28,69 @@ base cases:
 
 ---
 
-function stringify (arrPrimObj) {
-  
-  if (typeof arrPrimObj 
+Can consider implementing using a reduce function?
 
+function stringify() {
+  return reduce (object,
+          function () {},
+          ''
+         );
 }
+
+helper functions:
+
+stringifyPrimitiveValue;
+stringifyArray;
+stringifyObject;
 
 *******************************************************************************/
 
-// but you don't so you're going to have to write it from scratch:
 var stringifyJSON = function (obj, previousString) {
-  previousString = previousString || '';  
-  console.log('begin    :', previousString);
-    
+
   // base cases
   if (typeof obj === 'string') {
      return '\"' + obj + '\"';
   }
-
-  if (typeof obj === 'number') {
+  
+  if (typeof obj === 'number' || typeof obj === 'boolean' || obj === null) {
       return String(obj);
-  }
-
-  if (typeof obj === 'boolean') {
-      return String(obj);
-  }
-
-  if (obj === null) {
-      return String(null);
   }
 
   // recursive cases
-  // if obj ===  array, iterate through array and call stringify on each ele
+  previousString = previousString || '';  
+
+  // if obj === array, iterate through array and call stringify on each element
   if (Array.isArray(obj)) {
       previousString += "[";
 
-      console.log('enter if :', previousString);
-
       for (var i = 0, length = obj.length; i < length; i++) {
-	  if (i > 0) {
-	      previousString += ',';
-	  }
-	  previousString += stringifyJSON(obj[i]);
-          console.log('end loop :', previousString);	  
+          if (i > 0) {
+              previousString += ',';
+          }
+          previousString += stringifyJSON(obj[i]);
       }
-
-      console.log('exit for :', previousString);
 
       previousString += "]";
   } else {
-      var count = 0;
+      // if object is not an array (nor primitive types), must be an object
       previousString += "{";
-      console.log("ent for in:", previousString);
+
+      // var 'addMoreProp' is defined outside of the for-in loop as a 'counter' 
+      // to remember if there are more than one property in the object
+      var addMoreProp = false;
 
       for (var propName in obj) {
-          if (typeof obj[propName] !== 'function' && obj[propName] !== undefined) {
-              previousString += (count > 0 ? ',' : '') + '\"' + propName + '\"'+ ":";
-              previousString += stringifyJSON(obj[propName]);
-	      console.log("end each for:", previousString);
-	      count++;
-  	  }
+	  var propValue = obj[propName];
+          if (typeof propValue !== 'function' && propValue !== undefined) {
+	     
+              previousString += (addMoreProp ? ',' : '');
+              previousString += '\"' + propName + '\"'+ ":";
+              previousString += stringifyJSON(propValue);
+           
+              addMoreProp = true;
+          }
       }
       previousString += "}";
-      console.log("exit forIn :", previousString);
   }
-
-  console.log('final ret:', previousString);
   return previousString;
 };
-
-// primitive values and corner cases
-var test00 = [];         // empty array
-var test01 = {};         // empty literal obj
-var test02 = 0;          // number zero
-var test03 = 3;          // positive num
-var test04 = -4;         // neg number
-var test05 = '0';        // string char '0'
-var test06 = '3';        // string of pos number
-var test07 = 'a';        // char
-var test08 = '';         // empty string
-var test09 = 'word';     // string word
-
-var test0 = ['a'];
-var test1 = ['a', 'b', 'c'];
-var test2 = ['a', 'b', 2, 'c'];
-var test3 = ['a', 'b', ['c']];
-var test4 = ['a', 'b', [2, 'c']];
-var test5 = ['a', 'b', [[2], 'c'], 'd', [[[ 'e', '5' ], 'g', ], 10] ];
-var test6 = ['a', {no: 'yes'}, 'b'];
-var test7 = ['a', {no: 'yes'}, 'b', ['c', {d: ['three', 3, '3']}]];
-var test8 = {no: 'yes'};
-var test9 = {no: 'yes', five: 5};
-
-console.log(stringifyJSON(test7));
