@@ -3,6 +3,11 @@
 //   return document.getElementsByClassName(className);
 // };
 
+// should use:
+// document.body
+// element.childNOdes
+// element.classList
+
 // But in stead we're going to implement it from scratch:
 var getElementsByClassName = function (className) {
   // your code here
