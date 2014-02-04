@@ -23,14 +23,14 @@ var getElementsByClassName = function (className) {
       // return is necessary because we need to exit the function if the
       // parentNode does not exist
       if (parentNode === null) {
-	  return;
+          return;
 
       // .classList is undefined when parentNode === whitespace or text node,
       // and we cannot call .contains() on an undefined value
       } else if (parentNode.classList !== undefined) {
-	  if (parentNode.classList.contains(className)) {
-	      targetArray.push(parentNode);
-	  }	  
+          if (parentNode.classList.contains(className)) {
+              targetArray.push(parentNode);
+          }       
       }
 
    // recursive logic
@@ -68,30 +68,30 @@ var getElementsByClassName = function (className) {
     <body>
         <p class="target"> first  </p>
 
-	<div>
-	    <p class="target"> within 2nd </p>
-	</div>
+        <div>
+            <p class="target"> within 2nd </p>
+        </div>
 
-	<p> third <em> within em </em> </p>
-	
+        <p> third <em> within em </em> </p>
+        
     </body>
 </html>
 
             HTML
-	     |
+             |
     ___________________
     |                 |
   HEAD              BODY
                       |
                ___________________________
                |        |                |
-	   P(target)   DIV               P
-	       |        |                |
-	    "first"   P(target)       --------
-	                |      	      |      |
-		   "within 2nd"    "third"   EM
-		                             |
-		  		         "within em"
+           P(target)   DIV               P
+               |        |                |
+            "first"   P(target)       --------
+                        |             |      |
+                   "within 2nd"    "third"   EM
+                                             |
+                                         "within em"
 
 IF our recursive function had been (not work):
     getElement(parentNode.nextSibling) || getElement(parentNode.firstChild);
@@ -115,16 +115,16 @@ var parentNode = document.body;
     BODY                      // || operator exectues left side, .firstChild
         P(target)             // push to array, call .firstChild
             "first"           // call .firstChild
-	        null          // return;  || operator executes .nextSibling
+                null          // return;  || operator executes .nextSibling
         DIV                   // no 'target', call .firstChild
-	    P(target)         // push to array, call .firstChild
-	        "within 2nd"  // call .firstChild
-		    null      // return; || operator executes .nextSibling
+            P(target)         // push to array, call .firstChild
+                "within 2nd"  // call .firstChild
+                    null      // return; || operator executes .nextSibling
         P                     // no 'target', call .firstChild
-	    "third"           // call .firstChild
-	        null          // return; || executes .nextSibling
+            "third"           // call .firstChild
+                null          // return; || executes .nextSibling
             EM                // no 'target', call .firstChild
-	        "within me"   // call .firstChild
+                "within me"   // call .firstChild
                     null      // return; || calls .nextSibling
-	null                  // return; exits
+        null                  // return; exits
 */
