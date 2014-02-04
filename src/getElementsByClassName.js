@@ -10,25 +10,30 @@
 
 // But in stead we're going to implement it from scratch:
 var getElementsByClassName = function (className) {
-  // your code here
+
   var targetArray = [];  
 
   var getElements = function (parentNode) {
-      if (parentNode.classList('target')) {
-	  targetArray.push(parentNode);
+
+      if (parentNode === null) {
+	  return;
+      } else if (parentNode.classList !== undefined) {
+	  if (parentNode.classList.contains(className)) {
+	      targetArray.push(parentNode);
+	  }	  
       }
 
-      if (parentNode.firstChild === null) {
-	  getElements(parentNode.nextSibling);
-      } else {
-	  
-      }
+      // order is important, calling .nextSibling HAS TO BE on the right side
+      // of || , otherwise it would traverse first and skip child nodes
+      return getElements(parentNode.firstChild) ||
+	     getElements(parentNode.nextSibling);
+
   };
-      
+    
+  getElements(document.body);
+
+  return targetArray;      
 };
-
-
-var allNodes = document.body.childNodes;
 
 // note if no classList, then undefined. 
 
@@ -42,7 +47,3 @@ note:  document.body.childNodes[0].hasChildNodes === true
   this is because 'has child' is a TEXT node!!
 
 */
-
-for (var i = 0, length = allNodes.length; i < length; i++ ) {
-    console.log(allNodes.classList.contains('target'));
-}
