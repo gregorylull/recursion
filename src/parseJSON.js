@@ -33,50 +33,80 @@
      - if string === 0 - 9        
      - if string === undefined        // NOT in valid JSON
      - if string === null
+  
+  *update* not working
 
   OR
 
-  Create an array
+  two step recursion, convert string to object with index values, then object to final obj
+
+    '[3, [5], [["k"]], {}]';
+    [012345678901234567890]
+
+    separators on the same level: comma
+
+    object = {type, value, open, close, inside}
+    
+    type = bracket, brace, primitive, boolean
+
+    {type: brackets, value: null, open: 0, close: 20, inside: {
+      {type: primitive, value: 3, open: null, close: null, inside: null},
+      {type: brackets, value: null, open: 4, close: 6, }
+    } } 
+
+    {open: 9, close: 15},
+    {open: 10, close: 14}
+
+FURTHER refinement
+
+  Assumptions
+    1. json string input is valid json string
+    2. it follows that the first and last character of the string can only be
+       - [ ]
+       - " "
+       - { }
+       - ' '
+    3. need helper function that splits based on commas, and pushes to an array.
+    4. recursive function is then called on each element of that split array
 
 *******************************************************************************/
 
+var arraySplitter = function (jsonString) {
+    var withinDoubleQuotes = false;
+    var withinObject = false;
+    var sstr = '';
+    var sarray = [];
+
+    for (var i = 0, length = jsonString.length; i < length; i++) {
+	var currentChar = jsonString[i];
+	if (!withinDoubleQuotes && !withinObject && currentChar === ',' || currentChar === undefined) {
+	    sarray.push(sstr);
+	    sstr = '';
+	} else if (currentChar === '"') {
+	    sstr += currentChar;
+	    withinDoubleQuotes = !withinDoubleQuotes;
+	} else if (currentChar === '{' || currentChar === '}') {
+	    
+	} else {
+	    sstr += currentChar;
+	}
+    }
+
+    return sarray;
+};
+
 // but you're not, so you'll write it from scratch:
 var parseJSON = function (json) {
-    // currentIndex
-    var currentIndex = 0;
     
-    // helperfunctions
+
+
     
-    // returns true if array or object container has opening and ending
-    var hasContainerEnd = function (openBraceOrBracket, currentIndex) {
-	var closedBraceOrBracket = (openBraceOrBracket === "[" ? "]" : "}");
-	var currentChar = openBraceOrBracket;
-	var withinDoubleQuotes = false;
-	var containerOpened = 0, containerClosed = 0;
+    if (json[0] === "[") {
+	var parsedArray = [];
+	
+	return [ parseJSON(json.slice(1, -1)) ];
+    }
+    if (json[0] === "{") {
 
-        do {
-	    if (!withinDoubleQuotes) {
-		if (currentChar === openBraceOrBracket) {
-		    containerOpened++;
-		} else if (currentChar === closedBraceOrBracket) {
-		    containerClosed++;
-		}
-	    } else if (currentChar === '"') {
-		withinDoubleQuotes = !withinDoubleQuotes;
-	    }
-	    
-	    currentChar = json[++currentIndex];
-	    
-	} while (currentChar && containerOpened !== containerClosed);
-
-	return containerOpened === containerClosed;
-    };
-
-    // [ [], [], [] ];
-    var recursiveFunc (jsonChar, currentIndex, containerBegnningIndex, endOfContainerIndex) {
-    // if beginng of array, check for an end, returns array and its contens
-        if (jsonChar === "[" && hasContainerEnd(jsonChar, currentIndex)) {
-            return [ recursiveFunc(json.substring(currentIndex + 1, ), currentIndex + 1 ];
-        }
-    };
-};
+    }
+}
