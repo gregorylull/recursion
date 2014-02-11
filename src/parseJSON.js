@@ -78,11 +78,20 @@ more refining:
 
 *******************************************************************************/
 
+/*
+   this helper function takes in a properly JSON stringifed string, and returns
+   an array of first level comma indices. First level commas are commas that are 
+   NOT within double quotes, array brackets, or object braces
+   
+// index      :  0123456789012345678901234567890123456789012
+// jsonString : '[0, 1, "a, comma", {"an":2, "obj":3},[4,5]]'
+// return     :  [2, 5, 17, 36]
+*/
 var firstLevelCommas = function (jsonString) {
     // if first and last char is a double quote, and assuming it is a correctly
     // formatted JSON string, then the entire quote is a string
     if (jsonString[0] === '"') {
-	return [jsonString.length];
+	return 'string';
     }
 
     // otherwise return an array of comma indexes
@@ -122,30 +131,55 @@ var firstLevelCommas = function (jsonString) {
     return commaArray;
 };
 
-var arraySplitter = function (jsonString) {
-    var withinDoubleQuotes = false;
-    var withinObject = false;
-    var sstr = '';
-    var sarray = [];
+/*
+  Takes in a json string and an array of index values. The json string is split
+  at each index value and returns a new result object:
+  {type: someType, result: splittedArray}
 
-    for (var i = 0, length = jsonString.length; i < length; i++) {
-	var currentChar = jsonString[i];
-	if (!withinDoubleQuotes && !withinObject && currentChar === ',' || currentChar === undefined) {
-	    sarray.push(sstr);
-	    sstr = '';
-	} else if (currentChar === '"') {
-	    sstr += currentChar;
-	    withinDoubleQuotes = !withinDoubleQuotes;
-	} else if (currentChar === '{' || currentChar === '}') {
-	    
-	} else {
-	    sstr += currentChar;
-	}
+  *someType === "string" / "object" / "array"
+
+*/
+var customStringSplitter = function (jsonString, arrayOfSplitValues) {
+    
+    if (arrayOfSplitValues === 'string') {
+	return {type: "string", result: jsonString};
+    } else {
+	var resultArray = [];
+	var startIndex = 1;
+	for (var i = 0, len = arrayOfSplitValues.length+1; i < len; i++) {
+	    var end = arrayOfSplitValues[i] || jsonString.length-1;
+	    resultArray.push(jsonString.substring(startIndex, end));
+	    startIndex = end + 1;
+        }
+  
+        var objType = jsonString[0] === '[' ? "array" : "object";
+	return {type: objType, result: resultArray};
     }
-
-    return sarray;
 };
+
 
 // but you're not, so you'll write it from scratch:
 var parseJSON = function (json) {
+    if (json[0] === '"') {
+	return json;
+    } else if (json === 'true' || json === 'false') {
+	return !!json;
+    } else if (json === 'null') {
+	return null;	
+    } else if (json[0] === '[') {
+	var resultArray = []
+	var commaIndex = firstLevelCommas(json);
+	var afterSplit = customStringSplitter(json, commaIndex);
+	var afterSplitResult = afterSplit.result;
+	for (var i = 0, len = afterSplitResult.length; i < len; i++) {
+	    var item = afterSplitResult[i];
+	    resultArray.push(parseJSON(item));
+	}
+	return resultArray;
+
+    } else if (json[0] === '{') {
+	
+    } else {
+	return json;
+    }
 }
