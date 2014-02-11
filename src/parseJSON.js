@@ -69,7 +69,58 @@ FURTHER refinement
     3. need helper function that splits based on commas, and pushes to an array.
     4. recursive function is then called on each element of that split array
 
+more refining: 
+    1. object splitter, should split based on first level commas, i.e.:
+       '[0, {"one":1, "two":2}, [3, 4]]'
+    2. need to check if comma is within double quotes, arrays, and objects
+       - return an array of comma index for the string
+       - String.substring will take this result and split the string
+
 *******************************************************************************/
+
+var firstLevelCommas = function (jsonString) {
+    // if first and last char is a double quote, and assuming it is a correctly
+    // formatted JSON string, then the entire quote is a string
+    if (jsonString[0] === '"') {
+	return [jsonString.length];
+    }
+
+    // otherwise return an array of comma indexes
+    var commaArray = [];
+    var openArray = 0, closeArray = 0, openObj = 0, closeObj = 0;
+    var withinDoubleQuotes = false;
+    var openedEqualClosed = function () {
+        return !withinDoubleQuotes &&
+    	   openArray === closeArray &&
+    	   openObj   === closeObj;
+    };
+
+    var openOrClose = function (jsonChar) {
+        if (jsonChar === '[') { openArray++; }
+        else if (jsonChar === ']') { closeArray++; }
+        else if (jsonChar === '{') { openObj++; }
+        else if (jsonChar === '}') { closeObj++; }
+    };
+
+    // assuming first and last char of string are open/close brackets or braces
+    // then we just need to check the content in between, so index = 1, and len
+    // is one less than the full string length
+    for (var i = 1, len = jsonString.length - 1; i < len; i++) {
+        var currentChar = jsonString[i];
+	console.log('currentChar:', currentChar);
+        console.log(openedEqualClosed());
+        if (currentChar === '"') {
+    	    withinDoubleQuotes = !withinDoubleQuotes;
+        } else if (openedEqualClosed() && currentChar === ",") {
+     	    commaArray.push(i);
+	    console.log("comma array", commaArray);
+
+        } else if (!withinDoubleQuotes) {
+    	    openOrClose(currentChar);
+        }
+    }
+    return commaArray;
+};
 
 var arraySplitter = function (jsonString) {
     var withinDoubleQuotes = false;
@@ -97,16 +148,4 @@ var arraySplitter = function (jsonString) {
 
 // but you're not, so you'll write it from scratch:
 var parseJSON = function (json) {
-    
-
-
-    
-    if (json[0] === "[") {
-	var parsedArray = [];
-	
-	return [ parseJSON(json.slice(1, -1)) ];
-    }
-    if (json[0] === "{") {
-
-    }
 }
