@@ -191,9 +191,9 @@ var parseJSON = function (json) {
 	    } else {
 	    // for objects
 		var singleObj = parseObj(item);
-		var itemProp = singleObj.property;
-		var itemValue = singleObj.value;
-                resultObj[itemProp] = parseJSON(itemValue);
+		var itemProp = parseJSON(singleObj.property);
+		var itemValue = parseJSON(singleObj.value);
+                resultObj[itemProp] = itemValue;
 		console.log('execute obj propValue: ', singleObj);
 	    }
 	}
