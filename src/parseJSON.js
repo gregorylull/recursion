@@ -116,13 +116,10 @@ var firstLevelCommas = function (jsonString) {
     // is one less than the full string length
     for (var i = 1, len = jsonString.length - 1; i < len; i++) {
         var currentChar = jsonString[i];
-	console.log('currentChar:', currentChar);
-        console.log(openedEqualClosed());
         if (currentChar === '"') {
     	    withinDoubleQuotes = !withinDoubleQuotes;
         } else if (openedEqualClosed() && currentChar === ",") {
      	    commaArray.push(i);
-	    console.log("comma array", commaArray);
 
         } else if (!withinDoubleQuotes) {
     	    openOrClose(currentChar);
@@ -134,9 +131,10 @@ var firstLevelCommas = function (jsonString) {
 /*
   Takes in a json string and an array of index values. The json string is split
   at each index value and returns a new result object:
-  {type: someType, result: splittedArray}
+  {type: someType*, result: splittedArray**}
 
-  *someType === "string" / "object" / "array"
+  * someType === "string" / "object" / "array"
+  ** typeof splittedArray[0] === 'string'
 
 */
 var customStringSplitter = function (jsonString, arrayOfSplitValues) {
@@ -145,9 +143,10 @@ var customStringSplitter = function (jsonString, arrayOfSplitValues) {
 	return {type: "string", result: jsonString};
     } else {
 	var resultArray = [];
-	var startIndex = 1;
+	var type       =  jsonString[0] === '[' || jsonString[0] === '{' ? 1 : 0;
+	var startIndex = 0 + type;
 	for (var i = 0, len = arrayOfSplitValues.length+1; i < len; i++) {
-	    var end = arrayOfSplitValues[i] || jsonString.length-1;
+	    var end = arrayOfSplitValues[i] || jsonString.length - type;
 	    resultArray.push(jsonString.substring(startIndex, end));
 	    startIndex = end + 1;
         }
@@ -157,29 +156,51 @@ var customStringSplitter = function (jsonString, arrayOfSplitValues) {
     }
 };
 
+// parses stringified object property and value and returns an object
+var parseObj = function (jsonString) {
+    var splitIndex = [jsonString.search(':')];
+    var split = customStringSplitter(jsonString, splitIndex);
+    console.log(split);
+    return {property: split.result[0], value: split.result[1]};
+}
 
-// but you're not, so you'll write it from scratch:
+// recursive function
 var parseJSON = function (json) {
     if (json[0] === '"') {
-	return json;
+	console.log('execute quote');
+	return json.substring(1, json.length-1);
     } else if (json === 'true' || json === 'false') {
-	return !!json;
+        console.log('execute boolean');
+	return json === 'true';
     } else if (json === 'null') {
+	console.log('execute null');
 	return null;	
-    } else if (json[0] === '[') {
-	var resultArray = []
+    } else if (json[0] === '[' || json[0] === '{') {
+	if (json.length === 2) { return json[0] === '[' ? [] : {}; };
+	var resultObj = json[0] === '[' ? [] : {};
 	var commaIndex = firstLevelCommas(json);
 	var afterSplit = customStringSplitter(json, commaIndex);
 	var afterSplitResult = afterSplit.result;
 	for (var i = 0, len = afterSplitResult.length; i < len; i++) {
 	    var item = afterSplitResult[i];
-	    resultArray.push(parseJSON(item));
-	}
-	return resultArray;
 
-    } else if (json[0] === '{') {
+            // for arrays
+	    if (json[0] === '[') {
+		console.log('execute arrayPush: ', item);
+		resultObj.push(parseJSON(item));
+	    } else {
+	    // for objects
+		var singleObj = parseObj(item);
+		var itemProp = singleObj.property;
+		var itemValue = singleObj.value;
+                resultObj[itemProp] = parseJSON(itemValue);
+		console.log('execute obj propValue: ', singleObj);
+	    }
+	}
+	return resultObj;
 	
     } else {
-	return json;
+	console.log('execute allElse');
+	return +json;
     }
-}
+};
